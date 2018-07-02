@@ -136,6 +136,8 @@ local function get_user(token, openid)
    -- get user profile
 
    local ret = {
+      typ    = "qq",
+      uid    = rec["openid"],
       name   = rec["nickname"],
       avatar = rec["figureurl_qq_2"] or rec["figureurl_qq_1"]
    }
