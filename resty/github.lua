@@ -1,6 +1,6 @@
 --[[
 
-OAuth2 provider for weibo
+OAuth2 provider for github
 
 Author:
 
@@ -11,11 +11,11 @@ local cjson = require "cjson"
 
 local _M = {}
 
-local app_id     = cjson.decode(os.getenv("OAUTH2_APPID_WEIBO"))
-local app_secret = cjson.decode(os.getenv("OAUTH2_APPSECRET_WEIBO"))
+local app_id     = cjson.decode(os.getenv("OAUTH2_APPID_GITHUB"))
+local app_secret = cjson.decode(os.getenv("OAUTH2_APPSECRET_GITHUB"))
 local redirect   = cjson.decode(os.getenv("OAUTH2_REDIRECT"))
-local url_token  = "/oauth2/weibo/token"
-local url_user   = "/oauth2/weibo/user"
+local url_token  = "/oauth2/github/token"
+local url_user   = "/oauth2/github/user"
 
 local function get_code()
    local args, err = ngx.req.get_uri_args()
@@ -28,9 +28,9 @@ local function get_code()
 
    if not code then
       return nil, "No code found"
-   else
-      return code, nil
    end
+
+   return code
 end
 
 local function get_token(code)
@@ -40,7 +40,6 @@ local function get_token(code)
    local req_opt = {
       method = ngx.HTTP_POST,
       args = {
-         grant_type    = "authorization_code",
          client_id     = app_id,
          client_secret = app_secret,
          code          = code,
@@ -52,11 +51,16 @@ local function get_token(code)
 
    -- decode content
    ngx.log(ngx.ALERT, res.body)
-   local ret = cjson.decode(res.body)
-   local token = ret["access_token"]
-   local uid = ret["uid"]
+   local ret, err = ngx.decode_args(res.body)
 
-   return { token = token, uid = uid }, nil
+   if "truncated" == err then
+      return nil, "Too many request arguments"
+   end
+
+
+   local tok = ret["access_token"]
+
+   return tok
 end
 
 local function get_user(token)
@@ -65,11 +69,13 @@ local function get_user(token)
 
    local req_opt = {
       args = {
-         access_token = token["token"],
-         uid          = token["uid"]
+         access_token = token,
       }
    }
 
+   -- ngx.req.set_header("Content-Type", "application/json;charset=utf8");
+   -- ngx.req.set_header("Accept", "application/json");
+   -- ngx.req.clear_header("Accept-Encoding");
    local res = ngx.location.capture(url_user, req_opt)
 
    -- parse received
@@ -78,10 +84,10 @@ local function get_user(token)
    -- get user profile
 
    local ret = {
-      typ    = "weibo",
-      uid    = rec["idstr"],
-      name   = rec["screen_name"],
-      avatar = rec["avatar_hd"] or rec["avatar_large"]
+      typ    = "github",
+      uid    = rec["id"],
+      name   = rec["login"],
+      avatar = rec["avatar_url"]
    }
 
    return ret, nil
@@ -109,7 +115,7 @@ end
 
 ngx.log(ngx.ALERT, cjson.encode(token))
 
-local user, err = get_user(token, openid)
+local user, err = get_user(token)
 
 if err then
    ngx.log(ngx.ERR, err)

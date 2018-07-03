@@ -1,5 +1,6 @@
 --[[
-OAuth2 toolkit, used for OAuth2 login, includes some providers:
+
+OAuth2 toolkit, used for OAuth2 login, includes providers
 
 1. Github
 2. QQ
@@ -8,38 +9,76 @@ OAuth2 toolkit, used for OAuth2 login, includes some providers:
 5. Dingtalk
 6. Alipay
 
+
 Author:
 
-   HairyRabbit (2018)
-
-License:
-
-   MIT
+   2018 © HairyRabbit <yfhj1990@hotmail.com>
 ]]
 
 local cjson = require "cjson"
 
+-- @module oauth2
 local _M = {}
 
 local oauth2_secret = cjson.decode(os.getenv("OAUTH2_SECRET"))
 
+--- make sign from secret
+-- @param iat timestamp
+-- @param typ provider type
+-- @return sign or nil
+-- @return nil or errors
 local function sign(iat, typ)
+
+   -- assert secrect
+
+   if not oauth2_secret then
+      return nil, "The environment variable 'OAUTH2_SECRECT' not set"
+   end
+
+   -- assert typ
+
+   if not typ then
+      return nil, "Argument 'typ' was required"
+   end
+
    local opt = {
       iat = iat,
       typ = typ,
       key = oauth2_secret
    }
 
-   ngx.log(ngx.ALERT, cjson.encode(opt))
    return ngx.md5(ngx.encode_args(opt))
 end
 
-local function make_token(typ)
+
+--- make token
+-- @param typ provider type
+-- @return token or nil
+-- @return nil or errors
+local function token(typ)
+
+   -- assert typ
+
+   if not typ then
+      return nil, "Argument 'typ' was required"
+   end
+
    local now = tostring(ngx.now())
+
+   -- make sign
+
+   local sig, err = sign(now, typ)
+
+   if err then
+      return nil, err
+   end
+
+   -- make token
+
    local opt = {
       iat = now,
       typ = typ,
-      sig = sign(now, typ)
+      sig = sig
    }
 
    local ret = ngx.encode_base64(ngx.encode_args(opt))
@@ -47,6 +86,10 @@ local function make_token(typ)
    return ret
 end
 
+
+--- request code, redirect to provider login page
+-- @return ok or nil
+-- @return nil or errors
 local function request()
    local args, err = ngx.req.get_uri_args()
 
@@ -54,17 +97,35 @@ local function request()
       return nil, "Too many request arguments"
    end
 
+   -- assert request type
+
+   if not args["typ"] then
+      return nil, "Argument 'typ' was required"
+   end
+
+   -- make token and erasure type
+
    local typ = string.sub(args["typ"], 1)
-   args["state"] = make_token(typ)
+   local tok, err = token(typ)
+
+   if err then
+      return nil, err
+   end
+
+   args["state"] = tok
    args["typ"] = nil
 
-   ngx.log(ngx.ALERT, cjson.encode(args))
+   -- redirect to login page
 
    local url = string.format("/oauth2/%s/login?%s", typ, ngx.encode_args(args))
-   ngx.log(ngx.ALERT, url)
    ngx.redirect(url)
+
+   return true
 end
 
+
+--- received from service redirect
+-- @return page or n
 local function receive()
    local args, err = ngx.req.get_uri_args()
 
@@ -72,18 +133,36 @@ local function receive()
       return nil, "Too many request arguments"
    end
 
-   local code = args["code"]
-   local state = args["state"]
+   -- assert code and state
 
-   local opt = ngx.decode_args(ngx.decode_base64(state))
+   local code = args["code"]
+   local stat = args["state"]
+
+   if not code then
+      return nil, "Argument 'code' was required"
+   end
+
+   if not stat then
+      return nil, "Argument 'state' was required"
+   end
+
+   -- verify sign
+
+   local opt = ngx.decode_args(ngx.decode_base64(stat))
    local typ = opt["typ"]
    local ait = opt["ait"]
    local sig = opt["sig"]
+   local val, err = sign(ait, typ)
 
-   if not sig == sign(ait, typ) then
-      return nil, "sign verify invalid"
+   if err then
+      return nil, err
    end
 
+   if not sig == val then
+      return nil, "sign invalid"
+   end
+
+   -- request provider service
    local url = string.format("/oauth2/%s", typ)
    local req = {
       args = {
@@ -92,7 +171,7 @@ local function receive()
    }
 
    local res = ngx.location.capture(url, req)
-   return cjson.encode(res.body), nil
+   return cjson.decode(res.body)
 end
 
 _M.request = request
