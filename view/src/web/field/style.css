@@ -1,0 +1,29 @@
+/**
+ * <Field /> styles
+ */
+
+.main {
+  position: absolute;
+  bottom: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/**
+ * animation
+ */
+
+.anime {
+  transition: opacity 0.28s ease-in-out 0s;
+}
+
+.init {
+  opacity: 0;
+}
+
+.enter {
+  opacity: 1;
+}

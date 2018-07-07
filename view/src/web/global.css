@@ -1,0 +1,18 @@
+/**
+ * global styles
+ */
+
+html,
+body,
+:global(#app) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: system-ui;
+  font-size: 16px;
+  color: #232323;
+  background-color: #ffffff;
+}

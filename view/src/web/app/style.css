@@ -1,0 +1,54 @@
+/**
+ * <App /> styles
+ */
+
+.main {
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.top {
+  position: relative;
+  width:  20rem;
+  height: 10rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: -2rem;
+  margin-bottom: 2rem;
+}
+
+
+/**
+ * elements
+ */
+
+.icon {
+  fill: #fff;
+  width: 3rem;
+  height: auto;
+}
+
+.id {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-bottom: 0.25rem;
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: lighter;
+}
+
+.avatar {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 50%;
+}

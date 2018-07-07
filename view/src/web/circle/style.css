@@ -1,0 +1,68 @@
+/**
+ * <Circle /> styles
+ */
+
+.main {
+  position: absolute;
+  top:  50%;
+  left: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width:  5rem;
+  height: 5rem;
+
+  margin-top:  -2.5rem;
+  margin-left: -2.5rem;
+
+  background-color: #58baff;
+  border-radius: 50%;
+}
+
+
+/**
+ * animation
+ */
+
+.anime {
+  transition: opacity 0.28s ease-in-out 0s, top 0.28s ease-in-out 0s;
+}
+
+.init {
+  opacity: 0;
+}
+
+.enter {
+  opacity: 1;
+}
+
+.slide {
+  top: 35%;
+}
+
+
+/**
+ * difference color for provider
+ */
+
+.qq {
+  background-color: #58baff;
+}
+
+.weixin {
+  background-color: #92de90;
+}
+
+.weibo {
+  background-color: #f39c9c;
+}
+
+.github {
+  background-color: #565656;
+}
+
+.error {
+  background-color: #ff5d5d;
+}

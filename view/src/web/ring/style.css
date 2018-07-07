@@ -1,0 +1,86 @@
+/**
+ * <Ring /> styles
+ */
+
+.main {
+  position: absolute;
+  top:  50%;
+  left: 50%;
+
+  box-sizing: border-box;
+  border-radius: 50%;
+  z-index: -1;
+
+  background-color: transparent;
+
+  border-style: solid;
+  border-color: transparent;
+
+  animation: rotate 1.5s ease-in-out 1.5s infinite;
+}
+
+
+/**
+ * animation
+ */
+
+.anime {
+  transition: all 1s ease-in-out 0s;
+}
+
+.init {
+  width:  5rem;
+  height: 5rem;
+  margin-top:  -2.5rem;
+  margin-left: -2.5rem;
+
+  border-width: 0px;
+  opacity: 0;
+}
+
+.enter {
+  width:  6rem;
+  height: 6rem;
+  margin-top:  -3rem;
+  margin-left: -3rem;
+
+  border-width: 2px;
+  opacity: 1;
+}
+
+.left.qq {
+  border-left-color: rgba(88, 186, 255, 0.5);
+}
+
+.right.qq {
+  border-right-color: rgba(88, 186, 255, 0.5);
+}
+
+.left.weixin {
+  border-left-color: rgba(146, 222, 144, 0.5);
+}
+
+.right.weixin {
+  border-right-color: rgba(146, 222, 144, 0.5);
+}
+
+.left.weibo {
+  border-left-color: rgba(243, 156, 156, 0.5);
+}
+
+.right.weibo {
+  border-right-color: rgba(243, 156, 156, 0.5);
+}
+
+.left.github {
+  border-left-color: rgba(86, 86, 86, 0.5);
+}
+
+.right.github {
+  border-right-color: rgba(86, 86, 86, 0.5);
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
